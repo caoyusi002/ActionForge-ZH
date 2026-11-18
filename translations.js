@@ -965,13 +965,341 @@ Is there an API, CLI or headless mode, for example for scripts or Claude Code?	�
 Not yet. It is planned for later.	目前尚未提供，官方计划以后加入。
 `);
 
-  const translateLabel = key => labels.get(key) ?? motion.get(key) ?? tooltips.get(key) ?? dialogs.get(key);
+  const editorDetails = makeDictionary(`
+Rig it	绑定骨架
+Close	关闭
+Back to the Character tool — the dots are kept	返回「角色」面板，保留已放置的标记点。
+It should face you, standing. If it doesn’t, turn it:	让角色直立并面向你。如果朝向不对，请旋转角色。
+⟲ Turn left	⟲ 向左转
+⟳ Turn right	⟳ 向右转
+Turn left	向左转
+Turn right	向右转
+A quarter turn, so its front faces you	向左旋转 90°，让角色正面朝向你。
+A quarter turn the other way	向右旋转 90°。
+Height	身高
+Height m	身高（米）
+How tall the character stands, in metres	角色站立时的身高，单位为米。
+Drag the orange dots onto the chin (under it, where the jaw meets the neck), shoulders, wrists, groin and ankles. Hover one for its name.	将橙色标记拖到下巴下方（下颌与颈部交界处）、双肩、手腕、胯下和脚踝。将鼠标移到标记点上可查看名称。
+The white dots — elbows, knees and the fingertips — find themselves on the mesh. Drag one only if it’s wrong.	白色标记点会自动定位肘部、膝盖和指尖。位置不准时可拖动调整。
+A hand that comes out wrong? Drag its fingertip dot onto the tip of the middle finger: the hand then runs from the wrist to it, and isn’t guessed.	如果手部绑定方向不对，将指尖标记拖到中指尖。系统会用手腕指向中指尖的方向来确定手的朝向。
+Press Rig.	点击「绑定」。
+How many digits each hand has, the thumb counted. Fewer than five: the fingers kept are the index, then the middle, then the ring — the pinky is the first to go. The others’ bones stay in the skeleton with nothing weighted to them, so every clip still plays.	设置每只手的手指数，包含拇指。少于五指时，依次保留食指、中指和无名指，优先省略小指。其余指骨仍留在骨架中，蒙皮权重为零，原有动画仍可播放。
+Mitten — a thumb and one	连指手套（拇指和一组并拢手指）
+Detect fingers	检测手指
+Find every finger joint of both hands with a hand-landmark model, and put them there. Five-fingered hands, after Rig. The first time, the browser fetches the model from this site — about 20 MB — and keeps it. It runs on this computer: nothing of the character is sent anywhere. The joints are then yours to move; Reset joints or Ctrl+Z takes them back.	用手部关键点模型定位双手的每个手指关节。请先绑定骨架，仅支持五指角色。首次使用时浏览器会下载并缓存约 20 MB 的模型。识别在本机运行，角色数据留在本机。之后可以微调关节，也可点击「重置关节」或按 Ctrl+Z 还原。
+Detect fingers: five-fingered hands only.	手指检测仅支持五指角色。
+Mirror left and right	左右镜像
+Reset dots	重置标记点
+Every dot back where it was guessed, the elbows, knees and fingertips found again (Ctrl+Z brings them back)	将所有标记点恢复到自动估算的位置，重新定位肘部、膝盖和指尖。按 Ctrl+Z 撤销。
+Fix the dots first	请先调整标记点。
+Reset joints	重置关节
+The view is held here: it does not turn	当前锁定视角，无法旋转。
+A new version of ActionForge is ready.	ActionForge 有新版本可用。
+Load it	加载新版
+Keep your work in a folder on this computer, so that clearing the browser does not lose it.	将作品保存到本机文件夹，以免清除浏览器数据时丢失。
+Choose a folder	选择文件夹
+Not now	暂不
+Sort the characters	对角色排序。
+Every character	显示全部角色。
+Ready to wear: rigged, or on a skeleton of its own	显示可用角色，包括已绑定和拥有自身骨架的角色。
+Still to be rigged here	显示等待绑定骨架的角色。
+Make tags, rename or delete them, and give them to characters	创建、重命名或删除标签，并为角色添加标签。
+Worn now	当前使用的角色。
+Built-in characters come rigged	内置角色已绑定骨架。
+Built-in characters keep their names	内置角色名称固定。
+Materials: built-in characters keep theirs	内置角色使用自带材质。
+Built-in characters are not kept in this browser	内置角色由网站提供。
+Built-in characters can’t be deleted	内置角色无法删除。
+Import animation: Bring in an animation (FBX or GLB) on our own skeleton, Mixamo, Unreal (UE4 / UE5) or Reallusion (CC / ActorCore). Read and kept on this machine — nothing is uploaded, and only the animation is stored, never the character	从 FBX 或 GLB 导入动画，支持内置、Mixamo、Unreal（UE4 / UE5）或 Reallusion（CC / ActorCore）骨架。文件在本机读取，仅保存动画。
+Start one of your own animations from nothing: a pose held for as long as you choose, its keys in Base	以一个姿势创建自定义动画，自定帧数，关键帧写入基础层。
+Download — the animations ticked in the library, or the one on stage; or keep it under Yours	导出素材库里勾选的动画或舞台中的当前动画，也可保存到「我的动画」。
+Move — the picked joints with arrows. W, or G as in Blender	用箭头移动选中的关节。快捷键 W，也可用 Blender 的 G。
+Rotate — the picked joints with rings. E, or R as in Blender	用旋转环转动选中的关节。快捷键 E，也可用 Blender 的 R。
+Scale — the picked joints with handles, each along its own axes. S, as in Blender	用缩放手柄沿各关节的自身轴缩放。快捷键 S。
+Axes — what X, Y and Z are, for the rings and for R. Each joint always turns about its own joint	设定旋转环和 R 键所用的 X、Y、Z 轴。每个关节绕自己的关节中心旋转。
+The room’s axes	使用世界坐标轴。
+Pivot Point: Individual Origins — Each joint about itself — as the view always turned them. Click or ▾ for the list, . over the view	枢轴点为各自原点，每个关节绕自身旋转。点击按钮或下拉箭头查看选项，视图中的快捷键为句点键。
+Pivot Point: what R and S turn and size about, Only Locations, and the 3D cursor (. over the view)	选择 R 键旋转和 S 键缩放的中心，或使用「仅位置」和 3D 游标。视图中的快捷键为句点键。
+Snap’s step: how far each step of a turn goes	设置旋转吸附的角度步长。
+Picking joints: X mirror, Box select, Children, Other side	关节选取工具，包括 X 轴镜像、框选、选取子关节和选择对侧。
+X mirror — a drag turns the other side too, as its mirror image; both keyed	启用 X 轴镜像后，拖动时对侧会镜像旋转，两侧都记录关键帧。
+Box select (B) — drag a box over the view to pick every joint in it; Shift adds, Esc cancels	框选（B）。在视图中拖框选中关节，按 Shift 追加选择，按 Esc 取消。
+Children — pick every joint below the picked ones too: a hand’s fingers, a finger’s joints	同时选中当前关节下的全部子关节，例如手部下的手指关节。
+Other side — pick the mirror side instead; Shift+click: both sides	切换到镜像另一侧。按住 Shift 点击可同时选中两侧。
+What is drawn over him: Bones, Wireframe, Rig controls	设置角色上显示的骨骼、线框和骨架控制器。
+How the view looks: Drawn as (Colour, Grey, Matcap, Toon, Unlit), Lines, Light, Shadows, Background, Picture	设置视图外观，包括着色模式、线条、灯光、阴影、背景和画面。
+How it plays: Mirror, Reverse and its Origin, In Place and its X, Y, Z and YAW	设置播放方式，包括镜像、倒放起点和原地播放的轴向锁定。
+Preview with root motion removed	预览时移除根骨骼运动。
+Trails: the way each picked joint goes through the animation, drawn in the view — and every edit spread over the frames around it and written at once, whatever Auto-key says. Lit red while on	在视图中绘制选中关节的运动轨迹。编辑将同时应用到邻近帧，无论是否启用自动关键帧。红色表示已开启。
+Trails settings	运动轨迹设置
+The camera: Follow, Reframe	相机设置，包括跟随和重新取景。
+Silhouette	剪影
+Silhouette: flat ink shapes on paper — the pose as one shape — with the rig’s controls hidden. Again: your look, and the controls as they were	显示纯色剪影并隐藏骨架控制器，方便查看整体姿势。再次点击恢复原有外观和控制器。
+Click an axis to turn the view to that side, flat (orthographic) — the axis it looks down: the other side. Drag to orbit; hold Alt while orbiting to snap to the nearest view	点击坐标轴切换到该方向的正交视图，点击对应反向轴切换到对面。拖动可旋转视角，按住 Alt 可吸附到最近的标准视角。
+Perspective. Click: orthographic, the view flat — the character the same size	当前为透视视图。点击切换到正交视图，角色显示大小不变。
+A new layer above the selected one — what is keyed next goes into it	在选中层上方新建动画层，接下来记录的关键帧会写入新层。
+Move Up — the selected layer one place up the stack	将选中的动画层上移一位。
+Move Down — the selected layer one place down the stack	将选中的动画层下移一位。
+Base: always Additive	基础层始终使用叠加模式。
+Mute — kept, plays nothing	静音此层。保留该层数据，暂停应用它的动画。
+Solo — the other layers go silent	独奏此层，停用其他层。
+Lock — it takes no key, and still plays	锁定此层，禁止写入关键帧，仍然参与播放。
+The animation itself: under every layer, and no layer edits it	所有动画层底下的源动画，保留原始数据。
+Base: always 100%	基础层权重固定为 100%。
+Key the weight here — it then follows its keys over the clip	在当前帧为层权重打关键帧，动画其余帧的权重随关键帧变化。
+Merge Down	向下合并
+Merge Down — Base is the bottom layer: there is none under it to merge into	向下合并。基础层已在最下方。
+Flatten	合并全部层
+Flatten — every layer folded into Base, every frame as it plays now — asked first	确认后将所有动画层合并到基础层，保留每帧的当前播放效果。
+Reset to base	恢复源动画姿势
+Reset to base — on this frame, key every joint this layer holds on Base back to the animation’s own pose, whatever the other layers do	在当前帧将此层控制的关节恢复为源动画姿势，并写入关键帧。
+Reset layer key	重置层关键帧
+Reset layer key — on this frame, key everything this layer keys where “Base” changes nothing: the layers under it show through. Only what it keys already	仅重置此层已控制的项目在当前帧的关键帧，让下方动画层的结果显示出来。
+Duplicate — a copy of the layer and all its keys, just above it	将此层和所有关键帧复制到它的上方。
+Delete — Base is always there: not deleted	基础层始终保留，无法删除。
+Make my copy: your own copy of this animation, with what is on it, kept under Yours and opened to edit — the library clip stays as it ships	将当前动画及已有编辑另存到「我的动画」并打开副本。素材库动作保持原样。
+Copy a short link to exactly this. It saves the scene's settings on our server; your files are never uploaded.	复制当前场景的分享短链接。场景设置会保存到服务器，本机文件会留在本机。
+Copy and paste transforms	复制和粘贴变换
+Copy transforms	复制变换
+Copy transforms: where what is selected is in the world — on this frame (pick something first)	复制所选对象在当前帧的世界空间变换。请先选中对象。
+Paste transforms	粘贴变换
+Paste transforms: copy something first	请先复制变换，再粘贴。
+Global: where it is in the world	使用世界空间中的绝对变换。
+Relative: as seen from the active one — the one the gizmo is on; pasted, back beside it where it is then	以当前活动对象（显示变换工具的对象）为参照复制。粘贴时相对于活动对象的目标帧位置。
+Paste options	粘贴选项
+Paste options: where it goes, and which of Location and Rotation	设置粘贴目标，并选择粘贴位置、旋转或两者。
+Playback ▾	播放 ▾
+Playback: loop, follow the current frame, the speed	播放设置，包括循环、跟随当前帧和速度。
+Keying ▾	关键帧 ▾
+Keying: key, reset, copy, paste and mirror the pose of the picked joints	为所选关节的姿势打关键帧，或重置、复制、粘贴、镜像姿势。
+To the start — the range’s, where Start is set	跳到播放范围的起始帧。
+Previous key (↑) — of the selected lanes, or of every lane	跳到上一关键帧（↑）。优先检查所选轨道，未选择时检查全部轨道。
+Play backwards (Shift+Ctrl+Space) — again: pause	反向播放（Shift+Ctrl+空格），再按一次暂停。
+Next key (↓) — of the selected lanes, or of every lane	跳到下一关键帧（↓）。优先检查所选轨道，未选择时检查全部轨道。
+To the end — the range’s, where End is set	跳到播放范围的结束帧。
+Auto-key is on: what you move — a pose, an IK control, an Adjust slider — is keyed on this frame	自动关键帧已开启。姿势、IK 控制器和动作调整滑块的改动会记录到当前帧。
+Auto-key is off	自动关键帧已关闭
+Key what is picked here (K)	在当前帧为所选项目打关键帧（K）。
+Selected layer	选中层
+On: the timeline shows the selected layer’s controls only — click to show every layer’s	当前时间轴仅显示选中层的控制项。再次点击显示所有层。
+The editor under the bar	下方时间轴编辑器
+The editor under the bar — Strips, Graph or Keys. Click: the bar alone, a simple timeline in it, the view taller	下方可显示动画条、曲线或关键帧。点击可折叠为一条简易时间轴，扩大视图。
+Only Show Selected: in Keys and the Graph, only the curves of the controls picked in the view	在关键帧和曲线视图中，仅显示当前选中控制器的曲线。
+Filters	筛选
+Filters for Keys and the Graph — open either to use them	在关键帧或曲线视图中筛选通道。
+What the timeline shows	时间轴显示模式
+The timeline: clips, bands and keys	在时间轴上显示动画片段、轨道和关键帧。
+The keys as curves — drag a key, or its handles, to shape how a control moves	将关键帧显示为曲线。拖动关键帧或其手柄可改变控制器的运动。
+Every key of the clip in one list — the dope sheet (Blender's): its rows grouped, the switches in Properties	集中显示此动画的全部关键帧，并按轨道分组，类似 Blender 的动画摄影表。可在「属性」中调整显示。
+Zoom out	缩小
+Zoom in	放大
+Fit the whole timeline	缩放到完整时间轴。
+The current frame — click to type, drag to change	当前帧。点击可输入，拖动可连续调整。
+The range’s first frame — click to type, drag to change	播放范围的起始帧。点击可输入，拖动可调整。
+The range’s last frame — click to type, drag to change. Past the last frame, one of your own animations is made that much longer	播放范围的结束帧。点击可输入，拖动可调整。对自有动画，超出最后一帧会延长动画。
+Start	起始帧
+End	结束帧
+Where the range starts and ends: drag its [ or its ]	拖动左、右方括号调整范围的起止位置。
+Drag to set the range by hand — Range switches to Manual	拖动可手动设置播放范围，范围模式会切换为「手动」。
+Past the end — drop a strip here to lengthen the composite	将动画条放到末尾之外可延长合成动画。
+Drag to resize	拖动调整大小。
+Double-click the slider to reset	双击滑块可重置。
+Key this slider here — it then follows its keys (K)	在此帧为滑块打关键帧（K），其他帧的值随关键帧变化。
+Reshape one animation in depth: its curves, its controls, a style — and its eight directions. What you save there is here under Yours.	深入调整动画的曲线、控制器、风格与八方向动作。保存结果可在「我的动画」中查看。
+The animations here are in the public domain (CC0): use them anywhere, commercially, with no attribution required. Hover an animation to see who made it. Those by Quaternius are from the free versions of his Universal Animation Library packs.	这里的动画采用 CC0，可以免费商用，无需署名。悬停在动作上可查看作者。Quaternius 的动作来自其通用动画库的免费版本。
+The application and its source are not open. All rights reserved.	应用及其源代码保留所有权利。
+Licences in full, including the MIT notices for the libraries this tool is built on.	查看完整许可声明，包括此工具所用库的 MIT 许可。
+What the site keeps about you, and why. The tools run on your computer: nothing you make is uploaded.	了解网站保存哪些数据及原因。编辑工具在本机运行，作品留在本机。
+ActionForge for Windows and Linux: a window of its own that works with no connection	Windows 和 Linux 版 ActionForge。可在独立窗口中离线使用。
+ActionForge on Discord	ActionForge 的 Discord 社区
+CGstuff on YouTube	CGstuff 的 YouTube 频道
+A new workspace of your own	新建自定义工作区
+A new workspace of your own: named, starting with the ticks of the one you are in	新建并命名自定义工作区，沿用当前工作区的面板显示设置。
+Setup — a character brought in, rigged and skinned. What it shows: Window ▾	设置工作区，用于导入角色、绑定骨架和蒙皮。可在「面板」中调整布局。
+Animate — everyday posing and keying. What it shows: Window ▾	动画工作区，用于摆姿势和打关键帧。可在「面板」中调整布局。
+Browse — picking animations to use or download. What it shows: Window ▾	浏览工作区，用于挑选和下载动作。可在「面板」中调整布局。
+Scene — staging: the camera, props, who is in the shot. What it shows: Window ▾	场景工作区，用于布置相机、道具和出镜角色。可在「面板」中调整布局。
+Each arm and leg is FK until you turn its IK on, for the whole clip — as the old rig	手臂和腿默认采用 FK。启用相应肢体的 IK 后，对整个动画生效。
+IK and FK always on, with the IK / FK slider and its snaps — as Auto-Rig Pro	同时启用 IK 和 FK，并通过 IK / FK 滑块混合、对齐，操作类似 Auto-Rig Pro。
+A dot on each joint, and lines between them — as the old rig	每个关节用点表示，关节之间用线连接。
+Rings round the bones	在骨骼周围显示旋转环。
+Drag to turn the view, right-drag to move it, the wheel zooms — as it always was	拖动旋转视图，右键拖动平移，滚轮缩放。
+Two fingers turn the view, Shift and two fingers move it, a pinch zooms	双指滑动旋转视图，按住 Shift 双指滑动平移，双指捏合缩放。
+Every animation, pose, character and prop of the library, kept for use with no connection	缓存素材库中的全部动画、姿势、角色和道具以供离线使用。
+Nothing of the site is kept on this computer any more. What you have made stays	移除网站离线缓存，保留你创作的内容。
+Setup's column on the left of the view, as it begins	将设置栏放回视图左侧。
+Setup's column at the window's right edge, after the tools	将设置栏移到窗口最右侧，放在其他工具后方。
+Search poses…	搜索姿势…
+Static: a mesh, no bones	静态道具，仅包含网格。
+Hold in the left hand	用左手拿取。
+Hold in the right hand	用右手拿取。
+Start a new, empty scene — this one stays where it is saved, and in Recover	新建空场景。当前场景保留在保存位置，也可从「恢复」中找回。
+When the scene wears your own character, the file carries it (it gets bigger). Official characters and the mannequin never are — every copy of the site has them.	如果场景使用了自有角色，文件会附带该角色，体积也会增大。默认人偶和内置角色由网站提供。
+The set the list shows, and the download writes	当前显示及导出的动画集。
+A new set, empty, picked	新建空动画集并选中它。
+The set's name — the file's too: letters, digits and _	动画集名，也是导出文件名。可用字母、数字和下划线。
+The set's name	动画集名
+The set's description	动画集说明
+What this set is for	可填写动画集用途
+Mannequin: this set is written on it. Click to pick another	该动画集将以默认人偶导出。点击选择其他角色。
+This set and its ticks deleted — asked first; the animations themselves stay	确认后删除这个动画集及其勾选设置，保留原有动画。
+Every animation here, or none, for the download	全选或取消全选导出的动画。
+The animation shown, on this list — ticked	当前显示的动画已勾选。
+The export name of the animation shown	当前动画的导出名称
+Open the rigger on it	打开绑骨向导。
+Rig it here — place the dots	绑定骨架并放置标记点
+Place a few dots on its joints and it is rigged and skinned here. A .glb or .fbx with no skeleton — from an AI tool, a sculpt, a store model. Checked here, kept in this browser, never uploaded. Or drop it on the stage.	为关节放置标记点，然后在这里完成绑骨和蒙皮。支持任意来源的无骨架 GLB 或 FBX。可将文件拖入舞台，模型会在本机检查并保存在浏览器中。
+Pieces at real sizes to animate against — a wall, a table and chair, houses, trees, your own files — for reference only	以真实尺寸显示墙壁、桌椅、房屋、树木和自有模型，仅用于布景参考。
+A camera for the scene: look at your work from the angle it is meant to be seen from.	为场景设置相机，以实际拍摄角度查看作品。
+Put the camera where you are looking from now. Set again, it is moved there	将当前视角设为相机位置。再次设置会更新相机。
+The free view, to look round	自由旋转视角查看场景。
+Look through the camera	从相机视角查看。
+Ticked: this animation, one of your own, keeps this camera as its own. Moving the camera for another animation does not change it; picked again, its camera comes back; posted to the Community, it is seen through it. Not ticked: it uses the scene’s camera	勾选后，为此自有动画单独保存相机。切回动画时会恢复其相机，在社区中也会使用此视角。取消勾选后使用场景相机。
+Looking through the camera, moving the view moves the camera with it. Off, moving the view leaves the camera where it was set	看向相机画面时，启用后视角和相机一起移动。关闭后，相机保持原位置。
+The camera drawn in the scene, where it stands and what it takes in, while you are not looking through it	在自由视图中显示相机的位置和取景范围。
+What the camera sees, small, in a corner of the view while you look round. Drag its corner to make it larger or smaller	在视图角落显示相机的小窗预览。拖动角落可以改变大小。
+The animation's play range — greyed when it has none	导出动画的播放范围。没有播放范围时不可用。
+Every frame of the animation	导出该动画的所有帧。
+The Scene's pieces — wall, table, houses, your own files — in the video	在视频中显示场景物件，包括墙壁、桌子、房屋和自有模型。
+The animation's name and the frame, small, in the video's lower corner	在视频下角显示动画名称和帧号。
+Set a camera first: the video is what it sees	请先设置相机，视频会使用其画面。
+Where the camera stands, in metres: across, up, and toward you	相机在横向、竖向和深度方向的位置，单位为米。
+The place the camera looks at, in metres: across, up, and toward you	相机注视点在横向、竖向和深度方向的位置，单位为米。
+With perspective, as a camera sees — or with none	切换透视投影与正交投影。
+The focal length, as on a camera: a small number sees wide, a large one close	相机焦距。数值越小视野越广，数值越大画面越近。
+The angle the lens sees along the picture's longer side. It is the focal length said another way: change one and the other follows	画面长边的视场角，与焦距联动。
+The size of the sensor, along the picture's longer side. 36 is a full-frame camera	传感器在画面长边方向的尺寸。36 毫米为全画幅。
+An orthographic camera: how many metres the picture spans along its longer side	正交相机画面长边覆盖的距离，单位为米。
+How many pixels the picture is, across and down	画面的像素宽度与高度。
+How dark the view is outside the picture's frame, in Shot. It is not part of the picture	在相机预览中调整画框外的暗度。效果仅用于预览。
+Nearer than the first and further than the second is not drawn, metres	近于第一个距离或远于第二个距离的物体会被裁切，单位为米。
+The lens slid across the sensor, as a share of the picture's longer side: the picture moves without the camera turning, so upright lines stay upright	按画面长边的比例平移镜头。相机朝向保持不变，因此垂直线仍为垂直。
+Shift across	水平偏移
+Shift up	垂直偏移
+Tip the horizon: a tilted, uneasy frame	让地平线倾斜，调整相机滚转角。
+The frame in three each way: put what matters on a line, or where two cross	将画面横纵各分成三份。可将主体安排在参考线或交点上。
+The middle of the frame	标出画面中心。
+Corner to corner	显示连接对角的参考线。
+Keep action inside the outer box and words inside the inner one: the edges of a screen can be cut off	将主要动作放在外框内，文字放在内框内，避免屏幕边缘裁切。
+The Library beside Setup, the Outliner beside Animate — each in the other's column	交换素材库与骨骼树所在的侧栏。
+Every panel shown again in this workspace (the swap and Setup's side stay as they are)	显示当前工作区的所有面板，沿用侧栏位置。
+Animate workspace's ticks as it began	恢复动画工作区的默认面板配置。
+It should face you, standing. If it doesn’t, turn or tip it:	让角色直立并面向你。如果朝向不对，请旋转或翻转角色。
+Tip sideways	侧向翻转
+A quarter tip, its top to the right — for one lying on its side	向右翻转 90°，用于将侧躺的角色转正。
+Five	五指
+Four — no pinky	四指（无小指）
+Three — no pinky, no ring	三指（无小指、无名指）
+Detect fingers: after Rig.	生成骨架后即可检测手指。
+Build the skeleton from the dots	根据标记点生成骨架。
+Rigged here	在此完成绑定
+Our mannequin — click to pick it (Ctrl: more, Shift: a run), double-click to wear it	默认人偶。点击选中，按 Ctrl 增选、Shift 连选，双击使用。
+Its bones are matched to ours, and downloads come out on its own skeleton. A .glb or .fbx with a skeleton — ours, Mixamo, Unreal, Reallusion or its own. Checked here, kept in this browser, never uploaded. Or drop it on the stage.	将内置骨架的动作映射到角色骨架，并使用角色的原骨架导出。支持带有内置、Mixamo、Unreal、Reallusion 或自定义骨架的 GLB 或 FBX。可将文件拖入舞台，模型会在本机检查并保存在浏览器中。
+⚙ Rig it again	⚙ 重新绑定
+Rig it again: move its dots	重新绑定骨架，可调整标记点。
+Rename it	重命名此角色。
+Materials: its pictures, colours and roughness, as it shows here	调整显示的贴图、颜色和粗糙度。
+Save a copy: the file, or a backup with its rig work to add back later	保存角色文件，或保存包含绑骨进度的备份供之后导入。
+Delete it from this browser (asks first)	确认后从当前浏览器删除此角色。
+Hold in T-pose (to check)	保持 T 姿势（检查用）
+Freezes the character in our T-pose, the pose every clip starts from. Only what you see — nothing is changed.	将角色显示为内置 T 姿势，方便检查。仅影响预览。
+Hold in its own pose	保持原始姿势
+Freezes the character in the pose it was modelled in — its rest pose, and the one its exported files carry. Only what you see — nothing is changed.	显示角色建模时的静止姿势。导出的模型会使用该静止姿势。此选项仅影响预览。
+View only — doesn’t change anything.	仅用于预览。
+The view is held here; it does not turn	当前锁定视角，无法旋转。
+Tip forward	向前翻转
+A quarter tip, its top toward you — for one lying down or on its head	向前翻转 90°，用于将平躺或倒立的角色转正。
+The lines are the skeleton — the middle yellow, the left blue, the right red: each bone should run down the middle of its limb. Check from the side too.	线条表示骨架。中线为黄色，左侧为蓝色，右侧为红色。每根骨骼应位于对应肢体的中间，也请从侧面检查。
+A dot is a joint — where its bone turns, not where it ends. The fainter lines past the last joints (fingertips, toes, the top of the head) are the end bones; the smaller dot at each end moves it, if it doesn’t reach the end of the mesh.	圆点是关节旋转的位置。指尖、脚趾和头顶末端关节之后的淡色线条是末端骨骼。如果它未到达网格末端，可拖动末端的小圆点。
+A joint a little off? Drag it — from the front, the side or the back. Way off? Go back to the dots, move one, and Rig again.	可在前视、侧视或后视图拖动关节微调。如果偏差很大，请返回标记点步骤，调整标记后重新生成骨架。
+A cape, a skirt, a sword? Tag it below — or leave it, and it is weighted as body.	可在下方标记披风、裙装或剑等部件。未标记的部件会按身体计算权重。
+Bind & wear: the mesh is weighted to the skeleton and the character plays the clips.	点击「蒙皮并使用」，将网格与骨架绑定并计算权重，然后用该角色播放动画。
+Detect fingers: finds the finger joints for you. Changes only the fingers.	「检测手指」会自动定位关节，仅调整手指。
+Front	前视
+Side	侧视
+Back	后视
+The skeleton from the front: drag a joint across and up	从正面查看骨架。可拖动关节调整水平和垂直位置。
+The skeleton from the side: each joint in the middle of its limb — drag one up and in depth	从侧面检查关节是否在肢体中央。拖动可调整高度和前后位置。
+From behind: to tag a cape or what hangs on the back	从背面查看，方便标记披风或背部挂件。
+Orbit, zoom and pan as you like: click a joint, then move it with the arrows	自由旋转、缩放和平移视角。点击关节，然后用箭头移动。
+Finger adjust: close on one hand, orbiting as you like — click a knuckle, then move it with the arrows	近距离查看一只手，自由旋转视角。点击指关节，然后用箭头移动。
+Cloth and props	布料与道具
+Cloth	布料
+Prop	道具
+Untag	取消标记
+Then click a cape, a skirt or a flap: it follows the body smoothly — the pelvis and thighs below the hips, the spine and collarbones above — never the calves	点击披风、裙装或布片，将其标为布料，使其平滑跟随身体。髋部以下跟随骨盆和大腿，髋部以上跟随脊柱和锁骨。
+Then click a sword, a quiver or a pouch: it moves rigidly with one bone, which you can change	点击剑、箭袋或腰包，将其设为刚性道具。道具会跟随一根可更改的骨骼。
+Then click a tagged piece: weighted as body again	点击已标记部件，恢复按身体计算权重。
+Everything is weighted as body unless you tag it.	未标记的部件均按身体计算蒙皮权重。
+Envelopes	骨骼包络
+Show envelopes	显示骨骼包络
+The space each bone moves: its weight fades outside what is drawn. Measured by the same weighing Bind runs.	显示每根骨骼的影响范围。超出包络后权重逐渐衰减，计算方式与蒙皮相同。
+The space each bone moves, and how big it is.	显示各骨骼影响的空间和范围大小。
+Show one side (the right follows)	仅显示左侧（右侧跟随）
+Hide the right side’s joints: they still follow the left	隐藏右侧关节，右侧仍跟随左侧。
+Show bone axes	显示骨骼轴
+Each bone’s own axes at its joint, as it will stand once bound: X red, Y green (along the bone), Z blue. Worked out from the joints: a bone points at its next joint; its roll comes from the bend of the elbow or knee, the palm’s line, the foot kept flat; a finger takes its hand’s. The fingers’ show in Fingers.	在关节处显示绑定后的骨骼自身轴。X 为红色，Y 为绿色并沿骨骼方向，Z 为蓝色。骨骼指向下一关节，滚转由肘、膝、手掌或脚的姿态确定。指骨沿用手部方向，可在「手指」视图中查看。
+◂ Back to the dots	◂ 返回标记点
+Move a dot, then Rig again	调整标记点，然后重新生成骨架。
+Bind & wear ✓	蒙皮并使用 ✓
+Weight the mesh to the skeleton and wear it	为网格计算蒙皮权重，并切换到该角色。
+YAW	偏航
+Thumbnail size: drag for smaller or bigger tiles · double-click for the usual size	拖动调整动画缩略图大小，双击恢复默认大小。
+Thumbnail size	缩略图大小
+How the animations are shown	动画显示方式
+Each animation a tile: its moving picture and its name	卡片视图，显示每个动画的动态预览和名称。
+Each animation a row: a small picture, its name, its length, its tags and who made it	列表视图，显示动画缩略图、名称、时长、标签和作者。
+Search characters…	搜索角色…
+Nothing in this download has root motion	此导出中的动画均不包含根骨骼运动。
+GLB is always in metres; Units is for FBX	GLB 使用米为单位。此处的单位设置用于 FBX。
+The character on screen, alone, standing in its rest pose with its skeleton — no animation in the file. Import it into your engine first, to make the character; then download the clips without the mesh and import them onto its skeleton.	单独导出视图中的角色，包含静止姿势和骨架。可先将角色导入游戏引擎，再将单独导出的动画应用到该骨架。
+Animate — everyday posing and keying. The ticks here are this workspace's own.	动画工作区用于摆姿势和打关键帧。此处的勾选仅影响当前工作区。
+`);
+
+  const translateLabel = key => labels.get(key) ?? motion.get(key) ?? tooltips.get(key) ?? dialogs.get(key) ?? editorDetails.get(key);
   const categoryNames = new Map([
     ['locomotion', '移动'], ['interaction', '交互'], ['combat', '战斗'],
     ['aim', '瞄准'], ['gestures', '手势'], ['reactions', '受击与反应'],
     ['zombie', '僵尸动作'], ['fps', '第一人称'], ['other', '其他'],
   ]);
+  const bodyParts = new Map([
+    ['chin', '下巴'], ['groin', '胯下'], ['shoulder', '肩'], ['elbow', '肘'],
+    ['wrist', '手腕'], ['fingertip', '指尖'], ['knee', '膝盖'], ['ankle', '脚踝'],
+  ]);
+  const rigControls = new Map([
+    ['hips and the spine and head together', '髋部、脊柱和头部'],
+    ["hips' box", '髋部方框'], ["spine's, the neck's and the head's rings", '脊柱、颈部和头部旋转环'],
+    ["fingers' rings", '手指旋转环'], ["hand's IK box", '手部 IK 方框'],
+    ["upper arm's, the forearm's and the hand's rings", '上臂、前臂和手部旋转环'],
+    ["elbow's pole", '肘部极向控制器'], ["shoulder's ring, and its IK control where the arm has one", '肩部旋转环及可用的 IK 控制器'],
+    ["foot's IK box", '脚部 IK 方框'], ["thigh's, the calf's, the foot's and the toes' rings", '大腿、小腿、脚部和脚趾旋转环'],
+    ["knee's pole", '膝部极向控制器'], ["root's circle on the floor", '地面上的根骨骼圆环'],
+  ]);
+  const sideName = side => side === 'left' ? '左' : side === 'right' ? '右' : '';
   const dynamicLabels = [
+    [/^The ((?:(?:left|right) )?(?:chin|groin|shoulder|elbow|wrist|fingertip|knee|ankle)) dot isn't on the body — drag it onto the \1\.$/i, point => {
+      const words = point.toLowerCase().split(' ');
+      const part = sideName(words[0]) + bodyParts.get(words.at(-1));
+      return `${part}标记点没有落在模型上。请将它拖到角色的${part}。`;
+    }],
+    [/^"(.+)" · dots placed · press Rig$/, name => `「${name}」· 已放置标记点 · 点击「绑定」`],
+    [/^"(.+)" · skeleton built from the dots$/, name => `「${name}」· 已根据标记点生成骨架`],
+    [/^(.+) · ([\d.]+ [KMGT]B) — click to pick it \(Ctrl: more, Shift: a run\), double-click to rig it$/, (name, size) => `${name} · ${size} · 点击选中，按 Ctrl 增选、Shift 连选，双击打开绑骨向导。`],
+    [/^(.+) · (\d+) cm · ([\d.]+ [KMGT]B) — click to pick it \(Ctrl: more, Shift: a run\), double-click to wear it$/, (name, height, size) => `${name} · ${height} 厘米 · ${size} · 点击选中，按 Ctrl 增选、Shift 连选，双击使用。`],
+    [/^Nothing ticked in (.+), the set picked in Setup › Animations: \+ Add this animation puts the one shown on its list$/, name => `「设置 → 动画」中选中的动画集「${name}」没有勾选任何动画。点击「添加此动画」可将当前动作加入集合。`],
+    [/^([\w.]+): kept on ([\w.]+) each frame \(in the file, it hangs from the root\)$/, (bone, target) => `${bone} 每帧跟随 ${target}，在文件中挂在根骨骼下。`],
+    [/^The (.+?)(?: — (left|right))? — pressed, shown or not; drag across tiles to set them all the same$/, (control, side) => {
+      const name = rigControls.get(control);
+      return name && `显示${sideName(side)}${name}。点击切换，划过多个按钮可批量设置。`;
+    }],
+    [/^Snap (on|off) — click: (?:off|on), in (\d+(?:\.\d+)?)° steps\. Hold Ctrl during a drag for steps$/, (state, angle) => `旋转吸附已${state === 'on' ? '开启' : '关闭'}，步长为 ${angle}°。点击切换，拖动时按住 Ctrl 可暂时吸附。`],
+    [/^Snap (on|off) — click: (?:off|on)$/, state => `吸附已${state === 'on' ? '开启' : '关闭'}。点击切换。`],
+    [/^The current frame — click to type, drag to change · ([\d.]+)s \/ ([\d.]+)s$/, (elapsed, total) => `当前帧。点击可输入，拖动可调整 · ${elapsed} / ${total} 秒`],
+    [/^The scene's frame rate — (\d+) frames a second — and how it plays: (.+)$/, (rate, playback) => `场景帧率为 ${rate} 帧/秒。${playback === 'frame by frame' ? '逐帧播放。' : '点击可更改播放方式。'}`],
+    [/^Base — under every other layer, always here: keys go into it while it is picked\. Always 100% and Additive\. (\d+) bones?, (\d+) keys?$/, (bones, keys) => `基础层位于最下方。选中后可写入关键帧，始终以 100% 权重叠加。包含 ${bones} 根骨骼和 ${keys} 个关键帧。`],
+    [/^(.+?) › (.+?): ticked, shown; not ticked, hidden$/, (group, name) => `${translateLabel(group) ?? group} › ${translateLabel(name) ?? name}，勾选时显示。`],
+    [/^(Outliner|Setup|Animate|Library|Timeline): ticked, shown; not ticked, its whole (?:tab|part) hidden — kept so in this browser until it is ticked again$/, group => `勾选时显示「${translateLabel(group)}」，设置保存在当前浏览器。`],
+    [/^(.+) — (\d+) animations?: the set picked, the one the download writes$/, (name, count) => `${name} · ${count} 个动画。当前选中，将用于导出。`],
     [/^(Frame|Start|End) (\d+)$/, (label, frame) => `${{ Frame: '当前帧', Start: '起始帧', End: '结束帧' }[label]} ${frame}`],
     [/^(\d+) (?:clips?|animations?)$/, count => `${count} 个动画`],
     [/^(\d+) poses?$/, count => `${count} 个姿势`],
