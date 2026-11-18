@@ -1,0 +1,19 @@
+{
+  "manifest_version": 3,
+  "name": "ActionForge 简体中文",
+  "version": "1.0.0",
+  "description": "为 ActionForge 网页编辑器添加简体中文界面和双语动作名称。",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "ActionForge 简体中文",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://actionforge.app/*"],
+      "js": ["translations.js", "localize.js"],
+      "css": ["localize.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}

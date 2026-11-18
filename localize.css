@@ -1,0 +1,3 @@
+[data-af-zh-caption]::before {
+  content: attr(data-af-zh-caption) " · ";
+}
